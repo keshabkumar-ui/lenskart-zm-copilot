@@ -5,7 +5,7 @@
 
 ZM Copilot is an enterprise-grade **Autonomous Intelligence Agent** that identifies store performance drivers, generates causal root-cause diagnostics, and produces actionable operational playbooks for Zonal Managers.
 
-<div style="position: relative; padding-bottom: 62.5%; height: 0;"><iframe src="https://www.loom.com/embed/30862b02294c4ac18d9b588f37edf9d6" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>
+[![ZM Copilot Demo Video](https://cdn.loom.com/sessions/thumbnails/30862b02294c4ac18d9b588f37edf9d6-with-play.gif)](https://www.loom.com/share/30862b02294c4ac18d9b588f37edf9d6)
 
 ---
 
