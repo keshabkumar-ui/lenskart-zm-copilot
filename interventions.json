@@ -5,5 +5,12 @@
     "health": "EMERGENCY",
     "potential_uplift": 804.52,
     "plan_summary": "AI Generated Playbook Accepted"
+  },
+  {
+    "timestamp": "2026-04-24T16:05:26.491105",
+    "store_id": "LKST1244",
+    "health": "EMERGENCY",
+    "potential_uplift": 1305.95,
+    "plan_summary": "AI Generated Playbook Accepted"
   }
 ]
