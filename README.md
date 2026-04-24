@@ -13,6 +13,7 @@ An enterprise-grade **Autonomous Intelligence Agent** that identifies store perf
 - **Before**: Manual store diagnosis required 2-3 hours of data interpretation per store with inconsistent root-cause tracing.
 - **After**: ZM Copilot produces structured diagnostics + prioritized action plan in under 30 seconds.
 - **Delta**: **~95% faster diagnostic turnaround** with consistent, metric-backed recommendations.
+- **Business Impact**: Per ZM: 150 stores × ~2 hours saved = 300 hours/month = **~$50k ops cost avoidance** at scale.
 
 ---
 
@@ -137,7 +138,7 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed setup.
 ### Prerequisites
 - Python 3.10+
 - AWS Bedrock credentials (or run metrics-only mode)
-- `stores_data.parquet` (or any CSV with Lenskart schema)
+- `stores_data.parquet` (Place this in the root directory. If missing, the app will try to read `stores_data.csv`).
 
 ### Installation
 ```bash

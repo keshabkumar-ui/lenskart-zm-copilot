@@ -55,8 +55,7 @@ def get_bedrock_client():
     ak = os.getenv("AWS_ACCESS_KEY_ID")
     sk = os.getenv("AWS_SECRET_ACCESS_KEY")
     if not ak or not sk:
-        log.error("Bedrock client failed: AWS credentials not configured")
-        return None
+        raise ValueError("❌ AWS credentials required. Check .env file.")
     
     try:
         client = boto3.client(
@@ -669,10 +668,13 @@ def generate_report(data, max_retries: int = 3):
             log.warning("AI Model ID not configured in .env.")
             return "AI Error: BEDROCK_MODEL_ID_PRIMARY or BEDROCK_MODEL_ID_FALLBACK not set in .env."
 
-        c = get_bedrock_client()
-        if not c:
-            log.warning("Bedrock client unavailable — AWS credentials missing.")
-            return "AI Error: AWS Credentials not configured in .env."
+        try:
+            c = get_bedrock_client()
+            if not c:
+                return "AI Error: AWS Credentials not configured in .env."
+        except ValueError as e:
+            log.warning(str(e))
+            return f"AI Error: {str(e)}"
 
         try:
             log.info("AI call attempt %d/%d for %s", attempt, max_retries, store_id)
