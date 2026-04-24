@@ -1114,11 +1114,18 @@ def make_sparkline(time_series, field, color, height=160):
 
 
 def make_ranking_chart(decisions):
-    sorted_d = sorted(decisions, key=lambda x: x["metrics"]["revenue"], reverse=True)
+    # Sort ascending so Plotly displays the highest at the top
+    sorted_d = sorted(decisions, key=lambda x: x["metrics"]["revenue"])
+    
+    # If a ZM has 100+ stores, limit to Top 25 to avoid an unreadable chart
+    if len(sorted_d) > 25:
+        sorted_d = sorted_d[-25:]
+        
     stores   = [d["store_id"] for d in sorted_d]
     revenues = [safe_float(d["metrics"]["revenue"], 0) for d in sorted_d]
     health   = [d["health_label"] for d in sorted_d]
     colors   = [HEALTH_COLORS.get(h, "#64748b") for h in health]
+    
     fig = go.Figure(go.Bar(
         x=revenues, y=stores, orientation="h",
         marker_color=colors,
@@ -1129,11 +1136,11 @@ def make_ranking_chart(decisions):
         hovertemplate="%{y}<br>Revenue: ₹%{x:,.0f}<extra></extra>",
     ))
     fig.update_layout(
+        title=dict(text="Top 25 Stores" if len(decisions) > 25 else "", font=dict(size=10, color="#64748b")),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        margin=dict(l=0, r=70, t=10, b=0),
+        margin=dict(l=0, r=70, t=20, b=0),
         height=max(200, len(stores) * 34),
-        xaxis=dict(showgrid=True, gridcolor="#1a2535",
-                   tickfont=dict(color="#4a5568", size=9)),
+        xaxis=dict(showgrid=True, gridcolor="#1a2535", tickfont=dict(color="#4a5568", size=9)),
         yaxis=dict(showgrid=False, tickfont=dict(color="#8899aa", size=11)),
         bargap=0.35,
     )
@@ -1401,7 +1408,7 @@ for key, default in [
 # DATA LOADING
 # ─────────────────────────────────────────────
 @st.cache_data(ttl=3600, show_spinner=False)
-def get_data(period: str):
+def get_data(period: str, store_codes_tuple: tuple = None):
     file = "stores_data.parquet"
     if not os.path.exists(file):
         file = "stores_data_advanced.csv"
@@ -1433,6 +1440,23 @@ def get_data(period: str):
 
     if df.empty:
         return None, None, f"No data for period '{period}'. Try a broader range."
+
+    # OPTIMIZATION: Filter df before analyzing to drastically speed up data loading!
+    if store_codes_tuple is not None:
+        if len(store_codes_tuple) == 0:
+            df = df.iloc[0:0] # Empty dataframe
+        else:
+            # We use the exact normalize_store_code logic for safe filtering
+            df["_norm_id"] = df["store_id"].astype(str).str.upper().apply(lambda x: x.split(" - ", 1)[0].strip() if " - " in x else x.strip())
+            df = df[df["_norm_id"].isin(store_codes_tuple)]
+            df = df.drop(columns=["_norm_id"])
+    else:
+        # Fallback to top 100 stores
+        top_stores = df["store_id"].unique()[:100]
+        df = df[df["store_id"].isin(top_stores)]
+
+    if df.empty:
+        return None, None, "No mapped stores found in data."
 
     try:
         decisions = analyze_stores(df)
@@ -1504,21 +1528,18 @@ with st.sidebar:
     period = st.selectbox("Period", ["Daily", "Weekly", "Monthly", "Annual"], index=2,
                           label_visibility="visible")
 
+    # Pass the allowed_store_codes to get_data for optimization
+    store_codes_tuple = None
+    if mapping_mode_enabled and allowed_store_codes is not None:
+        store_codes_tuple = tuple(sorted(list(allowed_store_codes)))
+
     with st.spinner("Loading store data…"):
-        df, decisions, data_error = get_data(period)
+        df, decisions, data_error = get_data(period, store_codes_tuple)
 
     if data_error:
         st.error(data_error)
         st.stop()
 
-    if mapping_mode_enabled and allowed_store_codes is not None:
-        decisions = [
-            d for d in decisions
-            if isinstance(d, dict) and "store_id" in d and normalize_store_code(d["store_id"]) in allowed_store_codes
-        ]
-    else:
-        # Production Fallback: Show first 100 stores if no mapping found (e.g. initial setup)
-        decisions = decisions[:100]
     if not decisions:
         msg = f"No mapped stores available for {selected_person or selected_role}" if mapping_mode_enabled else f"No stores for {selected_role}"
         st.markdown(f"""
