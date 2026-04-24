@@ -2,21 +2,38 @@
 venv/
 env/
 .env
+.env.local
 
 # Python caches
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 .pytest_cache/
+*.egg-info/
+dist/
+build/
 
-# Test output & temp files
-test_final.pdf
-test_handover_report.pdf
-*.log
-
-# Keep the parquet, but ignore massive original CSVs if they accidentally get generated
-stores_data.csv
-stores_data_advanced.csv
-
-# Ignore VSCode / IDE configs
+# IDE & Editor configs
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs and databases
+*.log
+zm_learning.db
+
+# Test output & temp files
+test_*.pdf
+temp/
+*.tmp
+
+# Data files (keep parquet, ignore CSVs)
+*.csv
+!stores_data.parquet
+
+# OS specific
+Thumbs.db
