@@ -1,0 +1,22 @@
+# Environments
+venv/
+env/
+.env
+
+# Python caches
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Test output & temp files
+test_final.pdf
+test_handover_report.pdf
+*.log
+
+# Keep the parquet, but ignore massive original CSVs if they accidentally get generated
+stores_data.csv
+stores_data_advanced.csv
+
+# Ignore VSCode / IDE configs
+.vscode/
+.idea/
